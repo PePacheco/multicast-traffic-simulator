@@ -11,3 +11,9 @@ class Router:
 
   def get_subnet(self, sid):
       return self.subnets[sid]
+
+  def receive_from_subnet(self, subnet_id, mgroupid, msg):
+      print(f"{subnet_id} =>> {self.rid} : mping {mgroupid} {msg}")
+      for sid, subnet in self.subnets.items():
+          if sid != subnet_id: # Nao envia para a subnet que recebeu
+            subnet.receive_from_router(self.rid, mgroupid, msg)
