@@ -1,0 +1,5 @@
+mjoin s1 g1
+mjoin s3 g1
+mjoin s2 g3
+mjoin s3 g2
+mjoin s2 g4

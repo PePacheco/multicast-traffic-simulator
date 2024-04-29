@@ -5,7 +5,13 @@ class Subnet:
       self.groups = set()
 
   def join_group(self, mgroupid):
-      self.groups.add(mgroupid)
+      return self.groups.add(mgroupid)
 
   def leave_group(self, mgroupid):
       self.groups.discard(mgroupid)
+
+  def isOnGroup(self, mgroupid):
+    for m in self.groups:
+        if m == mgroupid:
+          return (m)
+    return (False)
