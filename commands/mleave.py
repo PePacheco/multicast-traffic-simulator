@@ -1,14 +1,15 @@
 class M_LEAVE:
 
-  def run(self, subnet, group):
-    if subnet.isOnGroup(group):
-       subnet.leave_group(group)
+  def run(self, sid, mgroupid, router):
+    subnet = router.get_subnet(sid)
+
+    if subnet.isOnGroup(mgroupid):
+       subnet.leave_group(mgroupid)
     else:
-      print(f"Não tem essa bosta ai {group}")
+      print(f"Não foi possível remover: {sid} => {router.rid} mleave {mgroupid}")
       return
 
-    if not subnet.isOnGroup(group):
-      print(f"M_LEAVE {subnet.sid} {group}")
+    if not subnet.isOnGroup(mgroupid):
+      print(f"{sid} => {router.rid} : mleave {mgroupid};")
     else:
-      print("ERRO AO REMOVER O GRUPO!")
-      pass
+      print("ERRO AO REMOVER DO GRUPO!")

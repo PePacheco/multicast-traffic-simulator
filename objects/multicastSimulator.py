@@ -23,7 +23,7 @@ class MulticastSimulator:
       for i in range(0,3):
           if ip_octetos[i] != subnet_octetos[i]:
               return False
-      return True  
+      return True
     
   def define_router_subnets(self, ips):
     subnets = {}
@@ -32,7 +32,6 @@ class MulticastSimulator:
       for sid, subnet in self.subnets.items():
         if self.verify_subnet(subnet.netaddr, ip):
           subnets[sid] = subnet
-          print("Adicionou", sid, subnets)
             
     return subnets
 
@@ -52,48 +51,38 @@ class MulticastSimulator:
 
   def process_subnets(self, index, data):
     if data[0] == '#SUBNET':
-      print(data[index])
       index += 1
       while data[index] != '#ROUTER':
         sid, netaddr = data[index].split(',')
-        print(sid, netaddr)
         self.subnets[sid] = Subnet(sid, netaddr)
         index += 1
     return index
 
   def process_routers(self, index, data):
     if data[index] == '#ROUTER':
-      print(data[index])
       index += 1
       while data[index] != '#ROUTERTABLE':
         parts = data[index].strip().split(',')
         rid, numifs = parts[0:2]
-        print(rid, numifs)
         ips = parts[2:]
         subnets = self.define_router_subnets(ips)
-        print(subnets)
         self.routers[rid] = Router(rid, numifs, ips, subnets)
         index += 1
     return index
 
   def process_routers_table(self, index, data):
     if data[index] == '#ROUTERTABLE':
-      print(data[index])
       index += 1
       while index < len(data):
         rid, netaddr, nexthop, ifnum = data[index].strip().split(',')
-        print(rid, netaddr, nexthop, ifnum)
         self.routers[rid].add_route(netaddr, nexthop, ifnum)
         index += 1
     
   def process_topology(self, filename):
     data = self.read_file(filename)
     
-    print("PROCESSANDO SUBNETS")
     index = self.process_subnets(0, data)
-    print("PROCESSANDO ROUTERS")
     index = self.process_routers(index, data)
-    print("PROCESSANDO ROUTERS_TABLE")
     self.process_routers_table(index, data)
   
   def execute_commands(self, filename):
@@ -110,7 +99,9 @@ class MulticastSimulator:
           
         elif command == 'mleave':
           sid, mgroupid = params.split()
-          self.MLEAVE.run(self.subnets[sid], mgroupid)
+          router = self.get_router_by_subnet(sid)
+          if router:
+            self.MLEAVE.run(sid, mgroupid, router)
         elif command == 'mping':
           sid, mgroupid, msg = params.split()
           self.MPING.run()
