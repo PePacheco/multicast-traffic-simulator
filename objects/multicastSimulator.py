@@ -65,6 +65,7 @@ class MulticastSimulator:
         parts = data[index].strip().split(',')
         rid, numifs = parts[0:2]
         ips = parts[2:]
+        #criar mapeamento de redes ponto a ponto aqui
         subnets = self.define_router_subnets(ips)
         self.routers[rid] = Router(rid, numifs, ips, subnets)
         index += 1
@@ -75,6 +76,7 @@ class MulticastSimulator:
       index += 1
       while index < len(data):
         rid, netaddr, nexthop, ifnum = data[index].strip().split(',')
+        #adicionar referencia real para o objeto router aqui
         self.routers[rid].add_route(netaddr, nexthop, ifnum)
         index += 1
 
