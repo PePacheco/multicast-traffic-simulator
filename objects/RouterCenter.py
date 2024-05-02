@@ -1,5 +1,5 @@
 class RouterCenter:
-    __instance = None
+    _instance = None
 
     @staticmethod
     def get_instance():
