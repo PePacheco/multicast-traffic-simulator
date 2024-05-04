@@ -43,6 +43,7 @@ class Router:
         self.ips = ips
         self.subnets = subnets
         self.routing_table = {}  # Tabela de roteamento
+        self.groups = {}
         self.router_center = RouterCenter.get_instance()
 
     def add_route(self, netaddr: str, nexthop: str, ifnum: str):
@@ -50,6 +51,15 @@ class Router:
 
     def get_subnet(self, sid):
         return self.subnets[sid]
+
+    def add_subnet_to_group(self, mgroupid: str, subnet_addr: str):
+        if mgroupid in self.groups:
+            self.groups[mgroupid].append(subnet_addr)
+            return
+        self.groups[mgroupid] = [subnet_addr]
+
+    def remove_subnet_from_group(self, mgroupid: str, subnet_addr: str):
+        self.groups[mgroupid].remove(subnet_addr)
 
     def broadcast(self, subnet_id: str, mgroupid: str, msg: str):
         originSubnetAddress = self.subnets[subnet_id].netaddr
@@ -63,17 +73,9 @@ class Router:
         original_address: str,
         last_address: str
     ):
-   
-        print("receive_from_router")
-
-        #fazer RPF aqui e tirar o return
-
         originalAdressNetworkAdress = ip_to_network(original_address)
-
-
         pathAdress = self.routing_table.get(originalAdressNetworkAdress)[0]
-        if pathAdress == last_address: 
-            print("rid ", self.rid, "enviando")
+        if pathAdress == last_address:
             self.sendPing(subnet_id, mgroupid, msg, original_address)
 
     def sendPing(
@@ -82,9 +84,8 @@ class Router:
         mgroupid: str,
         msg: str,
         original_address: str,
-        ):
-            print("sendPing")
-            #self._pingSubnets(subnet_id, mgroupid, msg)
+    ):
+            self._pingSubnets(subnet_id, mgroupid, msg)
             self._pingRouters(subnet_id, mgroupid, msg, original_address)
 
     def _pingSubnets(self, subnet_id: str, mgroupid: str, msg: str):
@@ -99,7 +100,6 @@ class Router:
         msg: str,
         original_address: str,
     ):
-        print("_pingRouters")
         for router in self.routing_table.values():
 
             router_address = router[0].split('/')[0]
@@ -113,6 +113,5 @@ class Router:
             if not current_subnet_especific_ip:
                 return
             netMask = current_subnet_especific_ip.split('/')[1]
-            destRouter = routerDict[router[0]+ "/"+netMask]
-            print("rid ", self.rid, " sending to destination:", router[0])
+            destRouter = routerDict[router[0]+ "/" + netMask]
             destRouter.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip)

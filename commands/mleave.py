@@ -5,6 +5,7 @@ class M_LEAVE:
 
     if subnet.isOnGroup(mgroupid):
        subnet.leave_group(mgroupid)
+       router.remove_subnet_from_group(mgroupid, subnet.netaddr)
     else:
       print(f"Não foi possível remover: {sid} => {router.rid} mleave {mgroupid}")
       return
