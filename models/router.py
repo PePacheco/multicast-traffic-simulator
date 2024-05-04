@@ -41,7 +41,10 @@ class Router:
 
     def broadcast(self, subnet_id: str, mgroupid: str, msg: str):
         print("broadcast")
-        self.sendPing(subnet_id, mgroupid, msg, self.rid)
+        for thisRouterIp in self.ips: 
+            # acho que tem um jeito melhor de fazer, isso mas o RPF deve solucionar qualquer problema gerado por isso
+            # qual problema? é um roteador com mais de uma subrede enviar mensagens através das subredes erradas para seus vizinhos
+            self.sendPing(subnet_id, mgroupid, msg, thisRouterIp)
 
     def receive_from_router(
         self,
@@ -51,9 +54,13 @@ class Router:
         original_address: str,
         last_address: str
     ):
+        print("original_address", original_address)
+        print(last_address)
         print("receive_from_router")
+        
         print(self.routing_table)
-        #teste aqui
+        #fazer RPF aqui e tirar o return
+        return
         self.sendPing(subnet_id, mgroupid, msg, original_address)
             
         
@@ -83,7 +90,7 @@ class Router:
     ):
         print("_pingRouters")
         for router in self.routing_table.values():
-            print("router: ",router)
+            
             router_address = router[0].split('/')[0]
             print(f"{self.rid} =>> {router_address}: mping {mgroupid}")
             if router[0] == '0.0.0.0':
@@ -91,7 +98,7 @@ class Router:
             routerDict = self.router_center.get_routers()
             
             current_subnet_especific_ip = ip_in_same_subnet(router_address, self.ips)
-            print("current_subnet_especific_ip: ", current_subnet_especific_ip)
+            
             if not current_subnet_especific_ip:
                 return
             netMask = current_subnet_especific_ip.split('/')[1]
