@@ -16,7 +16,7 @@ class RouterCenter:
 
     def add_router(self, router):
         for ip in router.ips:
-            ip_without_mask = ip.split('/')[0]
+            ip_without_mask = ip
             self.routers[ip_without_mask] = router
 
     def get_routers(self):
