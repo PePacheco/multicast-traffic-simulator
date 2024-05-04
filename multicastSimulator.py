@@ -1,5 +1,6 @@
-from objects.router import Router
-from objects.subnet import Subnet
+from models.router import Router
+from models.subnet import Subnet
+from state.RouterCenter import RouterCenter
 from commands import mjoin, mleave, mping
 
 
@@ -12,12 +13,12 @@ class MulticastSimulator:
     self.MPING = mping.M_PING()
     self.MLEAVE = mleave.M_LEAVE()
 
-  def verify_subnet(self, endereco_ip, subnet):
+  def verify_subnet(self, ip_address, subnet):
     # Separando o endereço IP e a máscara de sub-rede
       ip, mascara = subnet.split('/')
 
       # Verificando se os primeiros octetos são iguais
-      ip_octetos = endereco_ip.split('.')
+      ip_octetos = ip_address.split('.')
       subnet_octetos = ip.split('.')
 
       for i in range(0,3):
@@ -37,7 +38,7 @@ class MulticastSimulator:
 
   def get_router_by_subnet(self, sid):
     for rid, router in self.routers.items():
-      if router.subnets[sid]:
+      if  sid in router.subnets and router.subnets[sid]:
         return router
     return False
 
@@ -66,6 +67,8 @@ class MulticastSimulator:
         rid, numifs = parts[0:2]
         ips = parts[2:]
         subnets = self.define_router_subnets(ips)
+        router = Router(rid, numifs, ips, subnets)
+        RouterCenter.get_instance().add_router(router)
         self.routers[rid] = Router(rid, numifs, ips, subnets)
         index += 1
     return index
@@ -77,6 +80,9 @@ class MulticastSimulator:
         rid, netaddr, nexthop, ifnum = data[index].strip().split(',')
         self.routers[rid].add_route(netaddr, nexthop, ifnum)
         index += 1
+      # for _, router in self.routers.items():
+      #   print(router.rid)
+      #   print(router.routing_table)
 
   def process_topology(self, filename):
     data = self.read_file(filename)

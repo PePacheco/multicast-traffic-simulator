@@ -1,4 +1,4 @@
-from objects.multicastSimulator import MulticastSimulator
+from multicastSimulator import MulticastSimulator
 from sys import argv
 
 simulator = MulticastSimulator()
