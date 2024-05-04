@@ -17,14 +17,21 @@ class Router:
         return self.subnets[sid]
 
     def broadcast(self, subnet_id: str, mgroupid: str, msg: str):
-        print(f"{subnet_id} =>> {self.rid} : mping {mgroupid} {msg}")
+       
+       #self._pingSubnets(subnet_id, mgroupid, msg)
+        self._pingRouters(subnet_id, mgroupid, msg)
+
+    def _pingSubnets(self, subnet_id: str, mgroupid: str, msg: str):
         for sid, subnet in self.subnets.items():
-            if sid != subnet_id and subnet.isOnGroup(mgroupid): # Nao envia para a subnet que recebeu
+            if sid != subnet_id and subnet.isOnGroup(mgroupid):
                 subnet.receive_from_router(self.rid, mgroupid, msg)
-        # print(f'{self.rid} self.routing_table', self.routing_table)
-        for destination, router in self.routing_table.items():
+
+    def _pingRouters(self, subnet_id: str, mgroupid: str, msg: str):
+        
+        for router in self.routing_table.values():
             router_address = router[0]
             if router_address == '0.0.0.0':
                 continue
-            print(router_address)
-        print(self.router_center.get_routers())
+            routerDict = self.router_center.get_routers()            
+            routerDict[router_address].broadcast(subnet_id, mgroupid, msg)
+            print(f"{self.rid} =>> {router_address}: mping {mgroupid}")

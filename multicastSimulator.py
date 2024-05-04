@@ -69,7 +69,7 @@ class MulticastSimulator:
         subnets = self.define_router_subnets(ips)
         router = Router(rid, numifs, ips, subnets)
         RouterCenter.get_instance().add_router(router)
-        self.routers[rid] = Router(rid, numifs, ips, subnets)
+        self.routers[rid] = router
         index += 1
     return index
 
@@ -81,8 +81,7 @@ class MulticastSimulator:
         self.routers[rid].add_route(netaddr, nexthop, ifnum)
         index += 1
       # for _, router in self.routers.items():
-      #   print(router.rid)
-      #   print(router.routing_table)
+
 
   def process_topology(self, filename):
     data = self.read_file(filename)
