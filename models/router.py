@@ -3,17 +3,24 @@ import ipaddress
 
 
 def ip_in_same_subnet(ip_to_check, ip_list):
-    # Convert the target IP to an IP network object
-    target_network = ipaddress.ip_network(ip_to_check, strict=False)
+    # Convert the target IP to an IP address object
+    target_ip = ipaddress.ip_address(ip_to_check)
 
     # Check each IP in the list
-    for ip in ip_list:
-        # Convert the list IP to an IP address object (not a network)
-        current_ip = ipaddress.ip_address(ip.split('/')[0])
-
-        # Check if the current IP is in the same network as the target IP
-        if current_ip in target_network:
-            return current_ip
+    for ip_with_mask in ip_list:
+        # Split the IP address and the subnet mask
+        ip, subnet_mask = ip_with_mask.split('/')
+        # Convert the list IP to an IP address object
+        current_ip = ipaddress.ip_address(ip)
+        
+        # Create a network object using the IP address and subnet mask
+        current_network = ipaddress.ip_network(ip_with_mask, strict=False)
+        
+        # Check if the target IP is within the current network
+        if target_ip in current_network:
+            ipWithMask = str(current_ip)+'/'+subnet_mask
+            return ipWithMask
+    
     return None
 
 
@@ -33,9 +40,34 @@ class Router:
         return self.subnets[sid]
 
     def broadcast(self, subnet_id: str, mgroupid: str, msg: str):
-        # RVSP HERE
-        #self._pingSubnets(subnet_id, mgroupid, msg)
-        self._pingRouters(subnet_id, mgroupid, msg, self.rid, self.rid)
+        print("broadcast")
+        self.sendPing(subnet_id, mgroupid, msg, self.rid)
+
+    def receive_from_router(
+        self,
+        subnet_id: str,
+        mgroupid: str,
+        msg: str,
+        original_address: str,
+        last_address: str
+    ):
+        print("receive_from_router")
+        print(self.routing_table)
+        #teste aqui
+        self.sendPing(subnet_id, mgroupid, msg, original_address)
+            
+        
+
+    def sendPing(
+        self,
+        subnet_id: str,
+        mgroupid: str,
+        msg: str,
+        original_address: str,
+        ):
+            print("sendPing")
+            #self._pingSubnets(subnet_id, mgroupid, msg)
+            self._pingRouters(subnet_id, mgroupid, msg, original_address)
 
     def _pingSubnets(self, subnet_id: str, mgroupid: str, msg: str):
         for sid, subnet in self.subnets.items():
@@ -45,19 +77,24 @@ class Router:
     def _pingRouters(
         self,
         subnet_id: str,
-        mgroupid: str, msg: str,
+        mgroupid: str, 
+        msg: str,
         original_address: str,
-        last_address: str
     ):
+        print("_pingRouters")
         for router in self.routing_table.values():
+            print("router: ",router)
             router_address = router[0].split('/')[0]
             print(f"{self.rid} =>> {router_address}: mping {mgroupid}")
             if router[0] == '0.0.0.0':
                 continue
             routerDict = self.router_center.get_routers()
-            current_ip = ip_in_same_subnet(router_address, self.ips)
-
-            if not current_ip:
+            
+            current_subnet_especific_ip = ip_in_same_subnet(router_address, self.ips)
+            print("current_subnet_especific_ip: ", current_subnet_especific_ip)
+            if not current_subnet_especific_ip:
                 return
-
-            routerDict[router_address].broadcast(subnet_id, mgroupid, msg, original_address, current_ip)
+            netMask = current_subnet_especific_ip.split('/')[1]
+            destRouter = routerDict[router[0]+ "/"+netMask]
+            
+            destRouter.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip)
