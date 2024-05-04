@@ -52,10 +52,6 @@ class Router:
         return self.subnets[sid]
 
     def broadcast(self, subnet_id: str, mgroupid: str, msg: str):
-        print("broadcast")
-        print(self.rid)
-        print(mgroupid)
-        print(self.subnets)
         originSubnetAddress = self.subnets[subnet_id].netaddr
         self.sendPing(subnet_id, mgroupid, msg,  originSubnetAddress)
 
@@ -73,14 +69,11 @@ class Router:
         #fazer RPF aqui e tirar o return
 
         originalAdressNetworkAdress = ip_to_network(original_address)
-        print("ips", self.ips)
-        print("routing_table", self.routing_table)
-        print("original_address", original_address)
-        print("last_address", last_address)
-        print("originalAdressNetworkAdress: ", originalAdressNetworkAdress)
+
+
         pathAdress = self.routing_table.get(originalAdressNetworkAdress)[0]
-        print("pathAdress: ", pathAdress)
         if pathAdress == last_address: 
+            print("rid ", self.rid, "enviando")
             self.sendPing(subnet_id, mgroupid, msg, original_address)
 
     def sendPing(
@@ -121,5 +114,5 @@ class Router:
                 return
             netMask = current_subnet_especific_ip.split('/')[1]
             destRouter = routerDict[router[0]+ "/"+netMask]
-            print("destination:", router[0])
+            print("rid ", self.rid, " sending to destination:", router[0])
             destRouter.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip)
