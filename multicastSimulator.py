@@ -108,6 +108,6 @@ class MulticastSimulator:
           if router:
             self.MLEAVE.run(sid, mgroupid, router)
         elif command == 'mping':
-          router = self.get_router_by_subnet(sid)
           sid, mgroupid, msg = params.split()
+          router = self.get_router_by_subnet(sid)
           self.MPING.run(sid, mgroupid, router, msg)

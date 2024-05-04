@@ -3,6 +3,7 @@ from models.router import Router
 class M_PING:
 
   def run(self, sid: str, mgroupid: str, router: Router, msg: str):
+    print(f"mjoin {sid} {mgroupid} {router.rid} {msg}")
     self.m_flooding(router, sid, mgroupid, msg)
     self.m_pruning(router, sid, mgroupid, msg)
     self.m_ping(router, sid, mgroupid, msg)
