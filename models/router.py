@@ -63,7 +63,7 @@ class Router:
 
     def broadcast(self, subnet_id: str, mgroupid: str, msg: str):
         originSubnetAddress = self.subnets[subnet_id].netaddr
-        self.sendPing(subnet_id, mgroupid, msg,  originSubnetAddress)
+        self.sendFlood(subnet_id, mgroupid, msg,  originSubnetAddress)
 
     def receive_from_router(
         self,
@@ -76,24 +76,24 @@ class Router:
         originalAdressNetworkAdress = ip_to_network(original_address)
         pathAdress = self.routing_table.get(originalAdressNetworkAdress)[0]
         if pathAdress == last_address:
-            self.sendPing(subnet_id, mgroupid, msg, original_address)
+            self.sendFlood(subnet_id, mgroupid, msg, original_address)
 
-    def sendPing(
+    def sendFlood(
         self,
         subnet_id: str,
         mgroupid: str,
         msg: str,
         original_address: str,
     ):
-            self._pingSubnets(subnet_id, mgroupid, msg)
-            self._pingRouters(subnet_id, mgroupid, msg, original_address)
+            self._FloodSubnets(subnet_id, mgroupid, msg)
+            self._FloodRouters(subnet_id, mgroupid, msg, original_address)
 
-    def _pingSubnets(self, subnet_id: str, mgroupid: str, msg: str):
+    def _FloodSubnets(self, subnet_id: str, mgroupid: str, msg: str):
         for sid, subnet in self.subnets.items():
             if sid != subnet_id and subnet.isOnGroup(mgroupid):
                 subnet.receive_from_router(self.rid, mgroupid, msg)
 
-    def _pingRouters(
+    def _FloodRouters(
         self,
         subnet_id: str,
         mgroupid: str,
@@ -103,7 +103,7 @@ class Router:
         for router in self.routing_table.values():
 
             router_address = router[0].split('/')[0]
-            print(f"{self.rid} =>> {router_address}: mping {mgroupid}")
+            print(f"{self.rid} =>> {router_address}: mFlood {mgroupid}")
             if router[0] == '0.0.0.0':
                 continue
             routerDict = self.router_center.get_routers()
