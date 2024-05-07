@@ -77,10 +77,12 @@ class Router:
         originalAdressNetworkAdress = ip_to_network(original_address)
         pathAdress = self.routing_table.get(originalAdressNetworkAdress)[0]
         if pathAdress == last_address:
+            print(f'{self.rid} flooding')
             self._flood_routers(subnet_id, mgroupid, msg, original_address)
 
-    def _prune(self):
-        pass
+    def _prune(self, mgroupid: str, router_id: str):
+        if mgroupid in self.groups and len(self.groups[mgroupid]) > 0:
+            print(f'{self.rid} >> {router_id} : mprune {mgroupid}')
 
     def _ping_subnets(self, subnet_id: str, mgroupid: str, msg: str):
         for sid, subnet in self.subnets.items():
