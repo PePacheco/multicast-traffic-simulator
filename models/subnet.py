@@ -17,4 +17,4 @@ class Subnet:
     return (False)
 
   def receive_from_router(self, subnet_id, mgroupid, msg):
-      print(f"{self.sid} box {self.sid} : {mgroupid}#{msg} from {subnet_id}")
+      print(f"{self.sid} box {self.sid} : {mgroupid}#{msg} from {subnet_id};")

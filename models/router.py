@@ -63,7 +63,7 @@ class Router:
 
     def start_ping(self, subnet_id: str, mgroupid: str, msg: str):
         originSubnetAddress = self.subnets[subnet_id].netaddr
-        self._send_flood(subnet_id, mgroupid, msg,  originSubnetAddress)
+        self._flood_routers(subnet_id, mgroupid, msg,  originSubnetAddress)
 
     def receive_from_router(
         self,
@@ -73,22 +73,16 @@ class Router:
         original_address: str,
         last_address: str
     ):
+        # Reverse path forwarding
         originalAdressNetworkAdress = ip_to_network(original_address)
         pathAdress = self.routing_table.get(originalAdressNetworkAdress)[0]
         if pathAdress == last_address:
-            self._send_flood(subnet_id, mgroupid, msg, original_address)
-
-    def _send_flood(
-        self,
-        subnet_id: str,
-        mgroupid: str,
-        msg: str,
-        original_address: str,
-    ):
-            self._flood_subnets(subnet_id, mgroupid, msg)
             self._flood_routers(subnet_id, mgroupid, msg, original_address)
 
-    def _flood_subnets(self, subnet_id: str, mgroupid: str, msg: str):
+    def _prune(self):
+        pass
+
+    def _ping_subnets(self, subnet_id: str, mgroupid: str, msg: str):
         for sid, subnet in self.subnets.items():
             if sid != subnet_id and subnet.isOnGroup(mgroupid):
                 subnet.receive_from_router(subnet_id, mgroupid, msg)
@@ -100,6 +94,7 @@ class Router:
         msg: str,
         original_address: str,
     ):
+        flood_flow = ''
         for router in self.routing_table.values():
             router_address = router[0].split('/')[0]
             if router[0] == '0.0.0.0':
@@ -113,3 +108,5 @@ class Router:
             netMask: str = current_subnet_especific_ip.split('/')[1]
             destRouter: Router = routerDict[router[0]+ "/" + netMask]
             destRouter.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip)
+            flood_flow += f'{self.rid} >> {destRouter.rid}, '
+        print(f'{flood_flow[:-2]} : mflood {mgroupid}')
