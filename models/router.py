@@ -71,7 +71,8 @@ class Router:
         mgroupid: str,
         msg: str,
         original_address: str,
-        last_address: str
+        last_address: str,
+        received_from_router_id: str
     ):
         # Reverse path forwarding
         originalAdressNetworkAdress = ip_to_network(original_address)
@@ -79,6 +80,7 @@ class Router:
         if pathAdress == last_address:
             print(f'{self.rid} flooding')
             self._flood_routers(subnet_id, mgroupid, msg, original_address)
+        self._prune(mgroupid, received_from_router_id)
 
     def _prune(self, mgroupid: str, router_id: str):
         if mgroupid in self.groups and len(self.groups[mgroupid]) > 0:
@@ -109,6 +111,6 @@ class Router:
                 return
             netMask: str = current_subnet_especific_ip.split('/')[1]
             destRouter: Router = routerDict[router[0]+ "/" + netMask]
-            destRouter.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip)
+            destRouter.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip, self.rid)
             flood_flow += f'{self.rid} >> {destRouter.rid}, '
         print(f'{flood_flow[:-2]} : mflood {mgroupid}')
