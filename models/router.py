@@ -91,7 +91,7 @@ class Router:
     def _FloodSubnets(self, subnet_id: str, mgroupid: str, msg: str):
         for sid, subnet in self.subnets.items():
             if sid != subnet_id and subnet.isOnGroup(mgroupid):
-                subnet.receive_from_router(self.rid, mgroupid, msg)
+                subnet.receive_from_router(subnet_id, mgroupid, msg)
 
     def _FloodRouters(
         self,
@@ -103,7 +103,6 @@ class Router:
         for router in self.routing_table.values():
 
             router_address = router[0].split('/')[0]
-            print(f"{self.rid} =>> {router_address}: mFlood {mgroupid}")
             if router[0] == '0.0.0.0':
                 continue
             routerDict = self.router_center.get_routers()
