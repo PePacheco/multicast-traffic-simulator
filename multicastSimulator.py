@@ -58,17 +58,20 @@ class MulticastSimulator:
         self.subnets[sid] = Subnet(sid, netaddr)
         index += 1
     return index
-
+ 
   def process_routers(self, index, data):
+    routerCenter = RouterCenter.get_instance()
     if data[index] == '#ROUTER':
+      
       index += 1
       while data[index] != '#ROUTERTABLE':
         parts = data[index].strip().split(',')
         rid, numifs = parts[0:2]
         ips = parts[2:]
+        routerCenter.add_router_id(rid)
         subnets = self.define_router_subnets(ips)
         router = Router(rid, numifs, ips, subnets)
-        RouterCenter.get_instance().add_router(router)
+        routerCenter.add_router(router)
         self.routers[rid] = router
         index += 1
     return index

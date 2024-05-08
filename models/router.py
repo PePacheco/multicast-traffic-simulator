@@ -1,39 +1,5 @@
 from state.RouterCenter import RouterCenter
-import ipaddress
-
-def ip_to_network(ip_with_mask):
-    # Split the IP address and the subnet mask
-    ip, subnet_mask = ip_with_mask.split('/')
-
-    # Create an IP network object
-    network = ipaddress.ip_network(ip_with_mask, strict=False)
-
-    # Get the network address
-    network_address = network.network_address
-
-    return str(network_address)+"/"+subnet_mask
-
-
-def ip_in_same_subnet(ip_to_check, ip_list):
-    # Convert the target IP to an IP address object
-    target_ip = ipaddress.ip_address(ip_to_check)
-
-    # Check each IP in the list
-    for ip_with_mask in ip_list:
-        # Split the IP address and the subnet mask
-        ip, subnet_mask = ip_with_mask.split('/')
-        # Convert the list IP to an IP address object
-        current_ip = ipaddress.ip_address(ip)
-
-        # Create a network object using the IP address and subnet mask
-        current_network = ipaddress.ip_network(ip_with_mask, strict=False)
-
-        # Check if the target IP is within the current network
-        if target_ip in current_network:
-            ipWithMask = str(current_ip)+'/'+subnet_mask
-            return ipWithMask
-
-    return None
+from helpers.ip import ip_to_network, ip_in_same_subnet
 
 
 class Router:
@@ -72,25 +38,36 @@ class Router:
         msg: str,
         original_address: str,
         last_address: str,
-        received_from_router_id: str
-    ):
+        received_from_last_router_id: str
+    ) -> dict:
         # Reverse path forwarding
         originalAdressNetworkAdress = ip_to_network(original_address)
         pathAdress = self.routing_table.get(originalAdressNetworkAdress)[0]
         if pathAdress == last_address:
-            print(f'{self.rid} flooding')
+            # print(f'{self.rid} flooding')
             self._flood_routers(subnet_id, mgroupid, msg, original_address)
-        self._prune(mgroupid, received_from_router_id)
+        
+        routerCenter = RouterCenter.get_instance()
+        for id in routerCenter.router_ids:
+            if id != self.rid and id != received_from_last_router_id:
+                print(f'{self.rid} >> {id} : mflood {mgroupid};')
+        is_ok = self._prune(mgroupid, received_from_last_router_id)
+
+        return { self.rid: { 'is_ok': is_ok }}
 
     def _prune(self, mgroupid: str, router_id: str):
-        if mgroupid in self.groups and len(self.groups[mgroupid]) > 0:
+        if mgroupid not in self.groups or len(self.groups[mgroupid]) == 0:
             print(f'{self.rid} >> {router_id} : mprune {mgroupid}')
+            return False    
+        return True
 
-    def _ping_subnets(self, subnet_id: str, mgroupid: str, msg: str):
-        for sid, subnet in self.subnets.items():
+    def _ping_subnets(self, subnet_id: str, mgroupid: str, router) -> list:
+        subnets_to_ping = []
+        for sid, subnet in router.subnets.items():
             if sid != subnet_id and subnet.isOnGroup(mgroupid):
-                subnet.receive_from_router(subnet_id, mgroupid, msg)
-
+                subnets_to_ping.append(subnet)
+        return subnets_to_ping
+    
     def _flood_routers(
         self,
         subnet_id: str,
@@ -98,19 +75,32 @@ class Router:
         msg: str,
         original_address: str,
     ):
+        pruned_items = {}
+        pinged_items = []
         flood_flow = ''
+        
         for router in self.routing_table.values():
             router_address = router[0].split('/')[0]
             if router[0] == '0.0.0.0':
                 continue
-            routerDict = self.router_center.get_routers()
+            router_dict = self.router_center.get_routers()
 
             current_subnet_especific_ip = ip_in_same_subnet(router_address, self.ips)
 
             if not current_subnet_especific_ip:
                 return
-            netMask: str = current_subnet_especific_ip.split('/')[1]
-            destRouter: Router = routerDict[router[0]+ "/" + netMask]
-            destRouter.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip, self.rid)
-            flood_flow += f'{self.rid} >> {destRouter.rid}, '
+            net_mask: str = current_subnet_especific_ip.split('/')[1]
+            dest_router: Router = router_dict[router[0]+ "/" + net_mask]
+            is_destine_router_ok = dest_router.receive_from_router(subnet_id, mgroupid, msg, original_address, current_subnet_especific_ip, self.rid)
+            pruned_items = {**pruned_items, **is_destine_router_ok}
+            pinged_items = [*pinged_items, *self._ping_subnets(subnet_id, mgroupid, dest_router)]
+            flood_flow += f'{self.rid} >> {dest_router.rid}, '
+
         print(f'{flood_flow[:-2]} : mflood {mgroupid}')
+        
+        for item in pruned_items.items():
+            if not item[1]['is_ok']: # prune
+                print(f'{self.rid} >> {item[0]} : mprune {mgroupid}')
+        for subnet in pinged_items:
+            subnet.receive_from_router(subnet_id, mgroupid, msg)
+
