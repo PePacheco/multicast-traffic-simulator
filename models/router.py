@@ -46,7 +46,7 @@ class Router:
         if pathAdress == last_address:
             # print(f'{self.rid} flooding')
             self._flood_routers(subnet_id, mgroupid, msg, original_address)
-        
+
         routerCenter = RouterCenter.get_instance()
         for id in routerCenter.router_ids:
             if id != self.rid and id != received_from_last_router_id:
@@ -58,7 +58,7 @@ class Router:
     def _prune(self, mgroupid: str, router_id: str):
         if mgroupid not in self.groups or len(self.groups[mgroupid]) == 0:
             print(f'{self.rid} >> {router_id} : mprune {mgroupid}')
-            return False    
+            return False
         return True
 
     def _ping_subnets(self, subnet_id: str, mgroupid: str, router) -> list:
@@ -67,7 +67,7 @@ class Router:
             if sid != subnet_id and subnet.isOnGroup(mgroupid):
                 subnets_to_ping.append(subnet)
         return subnets_to_ping
-    
+
     def _flood_routers(
         self,
         subnet_id: str,
@@ -78,7 +78,7 @@ class Router:
         pruned_items = {}
         pinged_items = []
         flood_flow = ''
-        
+
         for router in self.routing_table.values():
             router_address = router[0].split('/')[0]
             if router[0] == '0.0.0.0':
@@ -96,11 +96,15 @@ class Router:
             pinged_items = [*pinged_items, *self._ping_subnets(subnet_id, mgroupid, dest_router)]
             flood_flow += f'{self.rid} >> {dest_router.rid}, '
 
-        print(f'{flood_flow[:-2]} : mflood {mgroupid}')
-        
+        if flood_flow:
+            print(f'{flood_flow[:-2]} : mflood {mgroupid}')
+
         for item in pruned_items.items():
             if not item[1]['is_ok']: # prune
                 print(f'{self.rid} >> {item[0]} : mprune {mgroupid}')
         for subnet in pinged_items:
             subnet.receive_from_router(subnet_id, mgroupid, msg)
-
+        for sid in self.subnets:
+            subnet = self.get_subnet(sid)
+            if subnet.sid != subnet_id and subnet.isOnGroup(mgroupid):
+                subnet.receive_from_router(subnet_id, mgroupid, msg)
