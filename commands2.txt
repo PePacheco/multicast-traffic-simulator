@@ -1,0 +1,3 @@
+mjoin s3 g1
+mping s1 g1 Hello
+mleave s3 g1

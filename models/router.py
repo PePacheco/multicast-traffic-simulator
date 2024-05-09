@@ -106,7 +106,17 @@ class Router:
         for subnet in pinged_items:
             subnet.receive_from_router(subnet_id, mgroupid, msg)
 
+        local_recv_flow = ''
+        local_ping_flow = ''
         for sid in self.subnets:
             subnet = self.get_subnet(sid)
             if subnet.sid != subnet_id and subnet.isOnGroup(mgroupid):
-                subnet.receive_from_router(subnet_id, mgroupid, msg)
+                local_recv_flow += subnet.receive_from_router(subnet_id, mgroupid, msg)
+                local_ping_flow += f'{self.rid} =>> {subnet.sid}, '
+
+        if local_ping_flow:
+            print(f'{local_ping_flow[:-2]} : mping {mgroupid} {msg};')
+
+        for string in local_recv_flow.split(','):
+            if string:
+                print(string)
