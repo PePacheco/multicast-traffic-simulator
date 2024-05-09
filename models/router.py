@@ -97,11 +97,11 @@ class Router:
             flood_flow += f'{self.rid} >> {dest_router.rid}, '
 
         if flood_flow:
-            print(f'{flood_flow[:-2]} : mflood {mgroupid}')
+            print(f'{flood_flow[:-2]} : mflood {mgroupid};')
 
         for item in pruned_items.items():
             if not item[1]['is_ok']: # prune
-                print(f'{self.rid} >> {item[0]} : mprune {mgroupid}')
+                print(f'{self.rid} >> {item[0]} : mprune {mgroupid};')
 
         for subnet in pinged_items:
             subnet.receive_from_router(subnet_id, mgroupid, msg)
