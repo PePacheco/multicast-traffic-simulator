@@ -102,8 +102,10 @@ class Router:
         for item in pruned_items.items():
             if not item[1]['is_ok']: # prune
                 print(f'{self.rid} >> {item[0]} : mprune {mgroupid}')
+
         for subnet in pinged_items:
             subnet.receive_from_router(subnet_id, mgroupid, msg)
+
         for sid in self.subnets:
             subnet = self.get_subnet(sid)
             if subnet.sid != subnet_id and subnet.isOnGroup(mgroupid):
