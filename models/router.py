@@ -1,5 +1,6 @@
 from state.RouterCenter import RouterCenter
 from helpers.ip import ip_to_network, ip_in_same_subnet
+from models.subnet import Subnet
 
 
 class Router:
@@ -30,6 +31,12 @@ class Router:
     def start_ping(self, subnet_id: str, mgroupid: str, msg: str):
         originSubnetAddress = self.subnets[subnet_id].netaddr
         self._flood_routers(subnet_id, mgroupid, msg,  originSubnetAddress)
+
+    def _find_router(self, router_id: str) :
+        for router in RouterCenter.get_instance().get_routers():
+            if router.rid == router_id:
+                return router
+        return None
 
     def receive_from_router(
         self,
@@ -102,6 +109,10 @@ class Router:
         for item in pruned_items.items():
             if not item[1]['is_ok']: # prune
                 print(f'{self.rid} >> {item[0]} : mprune {mgroupid};')
+
+        for item in pruned_items.items():
+            if item[1]['is_ok']: # not pruned
+                print(f'{self.rid} =>> {item[0]} : mping {mgroupid} {msg};')
 
         for subnet in pinged_items:
             subnet.receive_from_router(subnet_id, mgroupid, msg)
