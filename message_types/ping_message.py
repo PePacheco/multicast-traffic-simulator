@@ -1,9 +1,7 @@
-import base_message
+from message_types.base_message import BaseMessage
+from dataclasses import dataclass
 
-
-#It shows interest in one group only
-class PingMessage(base_message.BaseMessage):
-    def __init__(self, origin_adress, destination_adress, last_adress, multicast_group, message):
-        super().__init__(origin_adress, destination_adress, last_adress)
-        self.multicast_group = multicast_group
-        self.message = message
+@dataclass
+class PingMessage(BaseMessage):
+    multicast_group: str
+    message: str
