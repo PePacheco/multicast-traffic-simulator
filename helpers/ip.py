@@ -1,16 +1,16 @@
 import ipaddress
 
-def ip_to_network(ip_with_mask):
+def ip_to_network(ip_with_no_mask):
     # Split the IP address and the subnet mask
-    ip, subnet_mask = ip_with_mask.split('/')
+    ip = ip_with_no_mask
 
     # Create an IP network object
-    network = ipaddress.ip_network(ip_with_mask, strict=False)
+    network = ipaddress.ip_network(ip_with_no_mask, strict=False)
 
     # Get the network address
     network_address = network.network_address
 
-    return str(network_address)+"/"+subnet_mask
+    return str(network_address)
 
 
 def ip_in_same_subnet(ip_to_check, ip_list):

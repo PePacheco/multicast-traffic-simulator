@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class BaseMessage:
     origin_adress: str
     destination_adress: str
-    last_adress: str
+    last_address: str
 
     def get_origin_adress(self):
         return self.origin_adress
@@ -13,5 +13,5 @@ class BaseMessage:
     def get_destination_adress(self):
         return self.destination_adress
 
-    def get_last_adress(self):
-        return self.last_adress
+    def get_last_address(self):
+        return self.last_address

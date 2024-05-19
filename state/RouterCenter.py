@@ -1,3 +1,4 @@
+import models.router
 class RouterCenter:
     _instance = None
     routers = {}
@@ -24,3 +25,13 @@ class RouterCenter:
 
     def get_routers(self):
         return self.routers
+    
+    def get_router_instance(self, ip_without_mask) -> models.router.Router:
+        
+        for ip_with_mask, router_instance in self.routers.items():
+            address, mask = ip_with_mask.split('/')
+            if address == ip_without_mask:
+                return router_instance
+        return 
+    
+    

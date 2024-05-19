@@ -80,7 +80,8 @@ class MulticastSimulator:
     if data[index] == '#ROUTERTABLE':
       index += 1
       while index < len(data):
-        rid, netaddr, nexthop, ifnum = data[index].strip().split(',')
+        line = data[index].strip().split(',')
+        rid, netaddr, nexthop, ifnum = line
         self.routers[rid].add_route(netaddr, nexthop, ifnum)
         index += 1
       # for _, router in self.routers.items():
