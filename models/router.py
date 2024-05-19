@@ -13,7 +13,7 @@ from message_types.leave_message import LeaveMessage
 class Router:
     def __init__(self, rid, numifs, ips, subnets):
         from state.RouterCenter import RouterCenter
-        
+
         self.rid = rid
         self.numifs = numifs
         self.ips = ips
@@ -25,22 +25,19 @@ class Router:
     # router building methods
     def add_route(self, netaddr: str, nexthop: str, ifnum: str):
         self.routing_table[netaddr] = (nexthop, ifnum)
-        # print(f"Added route {netaddr} -> {nexthop} on router {self.rid}")
 
     # helper methods
 
     def get_nextHop_and_interface_from_net_addr(self, destaddr_with_no_mask: str):
-        print(self.routing_table)
         for netaddr, (next_hop, interface) in self.routing_table.items():
-            print(f"Comparing {destaddr_with_no_mask} with {netaddr}")
             if ip_in_same_subnet(destaddr_with_no_mask, netaddr):
                 return next_hop, interface
-            
+
         return None # it might not find it as a destiny
 
     #handle message receivals methods
 
-    def receive_from_router(self, package: BaseMessage):        
+    def receive_from_router(self, package: BaseMessage):
         match package:
             case FloodMessage():
                 self._handle_flood_message(package)
@@ -60,18 +57,13 @@ class Router:
                 pass
 
     def _handle_flood_message(self, package: FloodMessage):
-        print(f"Router {self.rid} received flood message from {package.origin_adress} to {package.destination_adress}")
-        print(package)
         #reverse path forwarding
+        print(f'{self.rid} received a message from {package.get_last_address()}')
         origin_address = package.origin_adress
-        correct_hop_addr_to_origin = self.get_nextHop_and_interface_from_net_addr(origin_address)
-        print(correct_hop_addr_to_origin)
+        correct_hop_addr_to_origin, interface = self.routing_table[origin_address]
         if package.get_last_address() == correct_hop_addr_to_origin:
             #flood here
-            pass
-        # answer and forward
-
-        
+            self.start_flood(package.multicast_group, package.origin_adress)
 
     def _handle_ok_message(self, package: OkMessage):
         pass
@@ -84,22 +76,22 @@ class Router:
 
     # start flooding
 
-    def start_ping(self, sid: str, mgroupid: str, ping_msg: str ):
-        self.start_flood(mgroupid)
+    def start_ping(self, sid: str , mgroupid: str, ping_msg: str ):
+        subnet_instance = self.subnets[sid]
+        origin_subnet_address = subnet_instance.netaddr
+        self.start_flood(mgroupid, origin_subnet_address)
 
 
-    def start_flood(self, mgroupid: str):
+    def start_flood(self, mgroupid: str, origin_subnet_address: str):
         already_flooded_neighbours = []
         for destination_net_address, (next_hop, interface) in self.routing_table.items():
             local_subnet_address = "0.0.0.0"
-            if next_hop != local_subnet_address and next_hop not in already_flooded_neighbours:
-                next_router_instance = self.router_center.get_router_instance(next_hop)
+            next_router_instance = self.router_center.get_router_instance(next_hop)
+            if (next_hop != local_subnet_address) and (next_hop not in already_flooded_neighbours):
                 this_router_address, mask = self.ips[int(interface)].split('/')
-                flood_message = FloodMessage(this_router_address, next_hop, this_router_address, mgroupid)
+                flood_message = FloodMessage(origin_subnet_address, next_hop, this_router_address, mgroupid)
                 already_flooded_neighbours.append(next_hop)
                 next_router_instance.receive_from_router(flood_message)
-                
- 
     # not used methods
 
     def get_subnet(self, sid):
