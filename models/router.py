@@ -28,11 +28,13 @@ class Router:
         # print(f"Added route {netaddr} -> {nexthop} on router {self.rid}")
 
     # helper methods
-    def get_nextHop_and_interface_from_net_addr(self, netaddr_with_no_mask: str):
-        for netaddr, (next_hop, interface) in self.routing_table.items():
-            netaddr_with_no_mask, mask = netaddr.split('/')
-            if netaddr == netaddr_with_no_mask:
-                return next_hop, interface
+
+    def get_nextHop_and_interface_from_dest_addr(self, destaddr_with_no_mask: str):
+        pass
+        # for netaddr, (next_hop, interface) in self.routing_table.items():
+        #     netaddr_with_no_mask, mask = netaddr.split('/')
+        #     if netaddr == netaddr_with_no_mask:
+        #         return next_hop, interface
 
 
     #handle message receivals methods
