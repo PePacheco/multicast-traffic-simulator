@@ -1,6 +1,5 @@
 
 from helpers.ip import ip_in_same_subnet
-from models.subnet import Subnet
 from message_types.base_message import BaseMessage
 from message_types.flood_message import FloodMessage
 from message_types.ok_message import OkMessage
@@ -12,8 +11,8 @@ from message_types.leave_message import LeaveMessage
 
 class Router:
     def __init__(self, rid, numifs, ips, subnets):
-        from state.RouterCenter import RouterCenter
-
+        from data.RouterCenter import RouterCenter
+        from logs.Logger import Logger
         self.rid = rid
         self.numifs = numifs
         self.ips = ips
@@ -21,6 +20,8 @@ class Router:
         self.routing_table = {}  # Tabela de roteamento
         self.groups = {}
         self.router_center = RouterCenter.get_instance()
+        self.logger = Logger.get_instance()
+
 
     # router building methods
     def add_route(self, netaddr: str, nexthop: str, ifnum: str):
@@ -58,7 +59,6 @@ class Router:
 
     def _handle_flood_message(self, package: FloodMessage):
         #reverse path forwarding
-        print(f'{self.rid} received a message from {package.get_last_address()}')
         origin_address = package.origin_adress
         correct_hop_addr_to_origin, interface = self.routing_table[origin_address]
         if package.get_last_address() == correct_hop_addr_to_origin:
@@ -97,11 +97,13 @@ class Router:
     def get_subnet(self, sid):
         return self.subnets[sid]
 
-    def add_subnet_to_group(self, mgroupid: str, subnet_addr: str):
+    def add_subnet_to_group(self, mgroupid: str, subnet_addr: str, subnet_id: str):
+        self.logger.join_debug(subnet_id, self.rid, mgroupid)
         if mgroupid in self.groups:
             self.groups[mgroupid].append(subnet_addr)
             return
         self.groups[mgroupid] = [subnet_addr]
 
-    def remove_subnet_from_group(self, mgroupid: str, subnet_addr: str):
+    def remove_subnet_from_group(self, mgroupid: str, subnet_addr: str, subnet_id: str):
+        self.logger.leave_debug(self.rid, subnet_id, mgroupid)
         self.groups[mgroupid].remove(subnet_addr)

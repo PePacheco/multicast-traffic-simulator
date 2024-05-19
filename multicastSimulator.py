@@ -1,6 +1,6 @@
 from models.router import Router
 from models.subnet import Subnet
-from state.RouterCenter import RouterCenter
+from data.RouterCenter import RouterCenter
 from commands import mjoin, mleave, mping
 
 
@@ -58,11 +58,11 @@ class MulticastSimulator:
         self.subnets[sid] = Subnet(sid, netaddr)
         index += 1
     return index
- 
+
   def process_routers(self, index, data):
     routerCenter = RouterCenter.get_instance()
     if data[index] == '#ROUTER':
-      
+
       index += 1
       while data[index] != '#ROUTERTABLE':
         parts = data[index].strip().split(',')
