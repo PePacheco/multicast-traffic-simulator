@@ -35,7 +35,8 @@ class Router:
             print(f"Comparing {destaddr_with_no_mask} with {netaddr}")
             if ip_in_same_subnet(destaddr_with_no_mask, netaddr):
                 return next_hop, interface
-
+            
+        return None # it might not find it as a destiny
 
     #handle message receivals methods
 
@@ -66,10 +67,11 @@ class Router:
         correct_hop_addr_to_origin = self.get_nextHop_and_interface_from_net_addr(origin_address)
         print(correct_hop_addr_to_origin)
         if package.get_last_address() == correct_hop_addr_to_origin:
+            #flood here
             pass
         # answer and forward
 
-        pass
+        
 
     def _handle_ok_message(self, package: OkMessage):
         pass
