@@ -33,3 +33,26 @@ def ip_in_same_subnet(ip_to_check, ip_list):
             return ipWithMask
 
     return None
+
+def ip_in_same_subnet(ip1_with_no_mask: str, subnet_with_mask: str) -> bool:
+    # Helper function to convert an IP string to a 32-bit integer
+    def ip_to_int(ip: str) -> int:
+        octets = ip.split('.')
+        return (int(octets[0]) << 24) + (int(octets[1]) << 16) + (int(octets[2]) << 8) + int(octets[3])
+    
+    # Helper function to create a subnet mask of n bits
+    def create_mask(bits: int) -> int:
+        return (1 << 32) - (1 << (32 - bits))
+    
+    # Convert IP and subnet to integers
+    ip1_int = ip_to_int(ip1_with_no_mask)
+    
+    subnet_ip, mask_length = subnet_with_mask.split('/')
+    subnet_int = ip_to_int(subnet_ip)
+    mask_length = int(mask_length)
+    
+    # Create the subnet mask
+    mask = create_mask(mask_length)
+    
+    # Compare the network portions
+    return (ip1_int & mask) == (subnet_int & mask)

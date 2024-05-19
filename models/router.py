@@ -1,5 +1,5 @@
 
-from helpers.ip import ip_to_network, ip_in_same_subnet
+from helpers.ip import ip_in_same_subnet
 from models.subnet import Subnet
 from message_types.base_message import BaseMessage
 from message_types.flood_message import FloodMessage
@@ -29,12 +29,12 @@ class Router:
 
     # helper methods
 
-    def get_nextHop_and_interface_from_dest_addr(self, destaddr_with_no_mask: str):
-        pass
-        # for netaddr, (next_hop, interface) in self.routing_table.items():
-        #     netaddr_with_no_mask, mask = netaddr.split('/')
-        #     if netaddr == netaddr_with_no_mask:
-        #         return next_hop, interface
+    def get_nextHop_and_interface_from_net_addr(self, destaddr_with_no_mask: str):
+        print(self.routing_table)
+        for netaddr, (next_hop, interface) in self.routing_table.items():
+            print(f"Comparing {destaddr_with_no_mask} with {netaddr}")
+            if ip_in_same_subnet(destaddr_with_no_mask, netaddr):
+                return next_hop, interface
 
 
     #handle message receivals methods
@@ -59,15 +59,14 @@ class Router:
                 pass
 
     def _handle_flood_message(self, package: FloodMessage):
-        # print(f"Router {self.rid} received flood message from {package.origin_adress} to {package.destination_adress}")
-        # print(package)
-        # #reverse path forwarding
-        # origin_address = package.origin_adress
-        # origin_net_address = ip_to_network(origin_address)
-        # correct_hop_addr_to_origin = self.get_nextHop_and_interface_from_net_addr(origin_net_address)
-        # print(correct_hop_addr_to_origin)
-        # if ip_to_network(package.get_last_address()) == correct_hop_addr_to_origin:
-        #     pass
+        print(f"Router {self.rid} received flood message from {package.origin_adress} to {package.destination_adress}")
+        print(package)
+        #reverse path forwarding
+        origin_address = package.origin_adress
+        correct_hop_addr_to_origin = self.get_nextHop_and_interface_from_net_addr(origin_address)
+        print(correct_hop_addr_to_origin)
+        if package.get_last_address() == correct_hop_addr_to_origin:
+            pass
         # answer and forward
 
         pass
