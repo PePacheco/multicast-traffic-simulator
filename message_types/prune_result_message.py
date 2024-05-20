@@ -5,3 +5,4 @@ from dataclasses import dataclass
 @dataclass
 class PruneResultMessage(BaseMessage):
     multicast_group: set[str]
+    sender_id: str

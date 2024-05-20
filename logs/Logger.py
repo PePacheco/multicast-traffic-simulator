@@ -15,3 +15,6 @@ class Logger:
 
     def flood_debug(self, sender_id: str, receiver_id: str, mgroupid: str) -> None:
         print(f'{sender_id} >> {receiver_id} : mflood {mgroupid};')
+
+    def prune_debug(self, sender_id: str, receiver_id: str, mgroupid: str) -> None:
+        print(f'{sender_id} >> {receiver_id} : mprune {mgroupid};')

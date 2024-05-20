@@ -26,7 +26,7 @@ class Router:
     # router building methods
 
     def add_route(self, netaddr: str, nexthop: str, ifnum: str):
-        self.routing_table[netaddr] = (nexthop, ifnum)    
+        self.routing_table[netaddr] = (nexthop, ifnum)
 
     def add_subnet_to_group(self, mgroupid: str, subnet_addr: str, subnet_id: str):
         self.logger.join_debug(subnet_id, self.rid, mgroupid)
@@ -38,7 +38,7 @@ class Router:
     def remove_subnet_from_group(self, mgroupid: str, subnet_addr: str, subnet_id: str):
         self.logger.leave_debug(self.rid, subnet_id, mgroupid)
         self.groups[mgroupid].remove(subnet_addr)
-    
+
     def _handle_prune_message(self, package: PruneResultMessage):
         pass
 
@@ -66,6 +66,8 @@ class Router:
                 neighbour_routers_interesting_groups.update(prune_answer.multicast_group)
                 if prune_answer.multicast_group:
                     self.interested_routers[next_hop] = prune_answer.multicast_group
+                else:
+                    self.logger.prune_debug(self.rid, prune_answer.sender_id, mgroupid)
 
         neighbour_routers_interesting_groups.update(self.interesting_groups())
         interestedGroups = neighbour_routers_interesting_groups
@@ -75,7 +77,7 @@ class Router:
     def receive_flood_from_router(self, package: FloodMessage)-> PruneResultMessage:
         pruneResut = self._handle_flood_message(package)
         return pruneResut
-    
+
 
     def _handle_flood_message(self, package: FloodMessage)-> PruneResultMessage:
         #reverse path forwarding
@@ -85,8 +87,8 @@ class Router:
         if package.get_last_address() == correct_hop_addr_to_origin:
             #flood here
             interestedGroups = self.start_flood(package.multicast_group, package.origin_adress)
-            
-        return PruneResultMessage(package.destination_adress, package.last_address, package.destination_adress, set(interestedGroups))
+
+        return PruneResultMessage(package.destination_adress, package.last_address, package.destination_adress, set(interestedGroups), self.rid)
 
 
     def interesting_groups(self) ->  set[str]:
