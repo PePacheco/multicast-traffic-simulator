@@ -31,19 +31,15 @@ class Router:
     def add_subnet_to_group(self, mgroupid: str, subnet_addr: str, subnet_id: str):
         self.logger.join_debug(subnet_id, self.rid, mgroupid)
         if mgroupid in self.groups:
-            self.groups[mgroupid].append(subnet_addr)
+            self.groups[mgroupid].append((subnet_id, subnet_addr))
             return
-        self.groups[mgroupid] = [subnet_addr]
+        self.groups[mgroupid] = [(subnet_id, subnet_addr)]
 
     def remove_subnet_from_group(self, mgroupid: str, subnet_addr: str, subnet_id: str):
         self.logger.leave_debug(self.rid, subnet_id, mgroupid)
-        self.groups[mgroupid].remove(subnet_addr)
-
-    def _handle_prune_message(self, package: PruneResultMessage):
-        pass
-
-    def _handle_ping_message(self, package: PingMessage):
-        pass
+        ips_list = self.groups[mgroupid]
+        filtered_ipsList = [ipTuple for ipTuple in ips_list if ipTuple[1] not in subnet_addr]
+        self.groups[mgroupid] = filtered_ipsList
 
     def _forward_ping_to_routers(self, mgroupid: str, message: str) -> None:
         for router_address, groups in self.interested_routers.items():
@@ -53,18 +49,26 @@ class Router:
                 for ip in self.ips:
                     if ip_in_same_subnet(router_address, ip):
                         origin_address = ip.split('/')[0]
-                        router._receive_ping_from_router(PingMessage(origin_address, router_address, origin_address, mgroupid, message))
+                        router.receive_ping_from_router(PingMessage(origin_address, router_address, origin_address, mgroupid, message))
                         break
 
-    def _receive_ping_from_router(self, package: PingMessage):
+    def _forward_ping_to_subnets(self, mgroupid: str, message: str) -> None:
+        interested_subnet_address = self.groups.get(mgroupid,[])
+        for subnet_id, subnet_address in interested_subnet_address:
+            print(f"box {message} to {subnet_id}")
+        
+    def receive_ping_from_router(self, package: PingMessage) -> None:
         mgroupid = package.multicast_group
-        self._forward_ping_to_routers(mgroupid, package.message)
+        ping_msg = package.message
+        self._forward_ping_to_routers(mgroupid, ping_msg)
+        self._forward_ping_to_subnets(mgroupid, ping_msg)
 
     def start_ping(self, sid: str , mgroupid: str, ping_msg: str):
         subnet_instance = self.subnets[sid]
         origin_subnet_address = subnet_instance.netaddr
         self.start_flood(mgroupid, origin_subnet_address)
         self._forward_ping_to_routers(mgroupid, ping_msg)
+        self._forward_ping_to_subnets(mgroupid, ping_msg)
 
     def start_flood(self, mgroupid: str, origin_subnet_address: str) -> set[str]:
         already_flooded_neighbours = []
