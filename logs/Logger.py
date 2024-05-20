@@ -22,5 +22,5 @@ class Logger:
     def ping_debug(self) -> None:
         pass
 
-    def box_debug(self, msg: str, mgroupid: str, sender_subnet_id: str, receiver_subnet_id) -> None:
-        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {sender_subnet_id};")
+    def box_debug(self, msg: str, mgroupid: str, origin_subnet_address: str, receiver_subnet_id) -> None:
+        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {origin_subnet_address};")
