@@ -9,4 +9,7 @@ class SubnetCenter:
         return SubnetCenter._instance
     
     def add_subnet(self, subnet):
-        self.subnets[subnet.sid] = subnet
+        self.subnets[subnet.netaddr] = subnet
+
+    def get_subnet_id(self, subnet_address):
+        return self.subnets[subnet_address]

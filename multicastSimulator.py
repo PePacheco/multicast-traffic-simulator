@@ -51,11 +51,15 @@ class MulticastSimulator:
     return dados
 
   def process_subnets(self, index, data):
+    from data.SubnetCenter import SubnetCenter
+    subnet_center = SubnetCenter.get_instance()
     if data[0] == '#SUBNET':
       index += 1
       while data[index] != '#ROUTER':
         sid, netaddr = data[index].split(',')
-        self.subnets[sid] = Subnet(sid, netaddr)
+        subnet_instace = Subnet(sid, netaddr)
+        self.subnets[sid] = subnet_instace
+        subnet_center.add_subnet(subnet_instace)
         index += 1
     return index
 
