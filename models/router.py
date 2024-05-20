@@ -45,12 +45,26 @@ class Router:
     def _handle_ping_message(self, package: PingMessage):
         pass
 
-    #ping
+    def _forward_ping_to_routers(self, mgroupid: str, message: str) -> None:
+        for router_address, groups in self.interested_routers.items():
+            if mgroupid in groups:
+                router = self.router_center.get_router_instance(router_address)
+                origin_address = ''
+                for ip in self.ips:
+                    if ip_in_same_subnet(router_address, ip):
+                        origin_address = ip.split('/')[0]
+                        router._receive_ping_from_router(PingMessage(origin_address, router_address, origin_address, mgroupid, message))
+                        break
 
-    def start_ping(self, sid: str , mgroupid: str, ping_msg: str ):
+    def _receive_ping_from_router(self, package: PingMessage):
+        mgroupid = package.multicast_group
+        self._forward_ping_to_routers(mgroupid, package.message)
+
+    def start_ping(self, sid: str , mgroupid: str, ping_msg: str):
         subnet_instance = self.subnets[sid]
         origin_subnet_address = subnet_instance.netaddr
         self.start_flood(mgroupid, origin_subnet_address)
+        self._forward_ping_to_routers(mgroupid, ping_msg)
 
     def start_flood(self, mgroupid: str, origin_subnet_address: str) -> set[str]:
         already_flooded_neighbours = []
@@ -72,8 +86,8 @@ class Router:
                     self.logger.prune_debug(prune_answer.sender_id , self.rid , mgroupid)
 
         neighbour_routers_interesting_groups.update(self.interesting_groups())
-        interestedGroups = neighbour_routers_interesting_groups
-        return interestedGroups
+        interested_groups = neighbour_routers_interesting_groups
+        return interested_groups
 
 
     def receive_flood_from_router(self, package: FloodMessage)-> PruneResultMessage:
@@ -89,7 +103,7 @@ class Router:
         if package.get_last_address() == correct_hop_addr_to_origin:
             #flood here
             interestedGroups = self.start_flood(package.multicast_group, package.origin_adress)
-            interestedGroups.update(self.interesting_groups())        
+            interestedGroups.update(self.interesting_groups())
             return PruneResultMessage(package.destination_adress, package.last_address, package.destination_adress, set(interestedGroups), self.rid)
         return None
 

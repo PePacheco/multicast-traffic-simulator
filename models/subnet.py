@@ -15,6 +15,3 @@ class Subnet:
         if m == mgroupid:
           return (m)
     return (False)
-
-  def receive_box_message_from_router(self, subnet_id, mgroupid, msg) -> str:
-      return f"{self.sid} box {self.sid} : {mgroupid}#{msg} from {subnet_id};,"
