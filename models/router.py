@@ -74,11 +74,7 @@ class Router:
 
 
     def receive_flood_from_router(self, package: FloodMessage)-> PruneResultMessage:
-        print(package)
         pruneResut = self._handle_flood_message(package)
-        print(pruneResut)
-        print(self.groups)
-        print(self.interested_routers)
         return pruneResut
     
 
