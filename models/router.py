@@ -63,11 +63,13 @@ class Router:
                 flood_message = FloodMessage(origin_subnet_address, next_hop, this_router_address, mgroupid)
                 already_flooded_neighbours.append(next_hop)
                 prune_answer = next_router_instance.receive_flood_from_router(flood_message)
+                if not prune_answer:
+                    continue
                 neighbour_routers_interesting_groups.update(prune_answer.multicast_group)
                 if prune_answer.multicast_group:
                     self.interested_routers[next_hop] = prune_answer.multicast_group
                 else:
-                    self.logger.prune_debug(self.rid, prune_answer.sender_id, mgroupid)
+                    self.logger.prune_debug(prune_answer.sender_id , self.rid , mgroupid)
 
         neighbour_routers_interesting_groups.update(self.interesting_groups())
         interestedGroups = neighbour_routers_interesting_groups
@@ -87,8 +89,9 @@ class Router:
         if package.get_last_address() == correct_hop_addr_to_origin:
             #flood here
             interestedGroups = self.start_flood(package.multicast_group, package.origin_adress)
-
-        return PruneResultMessage(package.destination_adress, package.last_address, package.destination_adress, set(interestedGroups), self.rid)
+            interestedGroups.update(self.interesting_groups())        
+            return PruneResultMessage(package.destination_adress, package.last_address, package.destination_adress, set(interestedGroups), self.rid)
+        return None
 
 
     def interesting_groups(self) ->  set[str]:
