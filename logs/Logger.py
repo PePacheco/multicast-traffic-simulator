@@ -1,5 +1,8 @@
+from data.SubnetCenter import SubnetCenter
+
 class Logger:
     _instance = None
+    subnet_center = SubnetCenter.get_instance()
 
     @staticmethod
     def get_instance():
@@ -23,4 +26,5 @@ class Logger:
         pass
 
     def box_debug(self, msg: str, mgroupid: str, origin_subnet_address: str, receiver_subnet_id) -> None:
-        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {origin_subnet_address};")
+        subnet_id = self.subnet_center.subnets.get(origin_subnet_address)
+        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {subnet_id};")
