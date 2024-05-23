@@ -57,7 +57,7 @@ class Router:
         for subnet_id, subnet_address in interested_subnet_addresses:
             subnet = self.subnets.get(subnet_id)
             subnet.receive_ping_from_router(origin_subnet_address, mgroupid, message)
-        
+
     def receive_ping_from_router(self, package: PingMessage) -> None:
         mgroupid = package.multicast_group
         ping_msg = package.message
@@ -88,7 +88,8 @@ class Router:
                 if prune_answer.multicast_group:
                     self.interested_routers[next_hop] = prune_answer.multicast_group
                 else:
-                    self.logger.prune_debug(prune_answer.sender_id , self.rid , mgroupid)
+                    self.logger.pruned_returns.append({ 'pruned_answer': prune_answer, 'mgroupid': mgroupid, 'self.rid': self.rid })
+                    # self.logger.prune_debug(prune_answer.sender_id , self.rid , mgroupid)
 
         neighbour_routers_interesting_groups.update(self.interesting_groups())
         interested_groups = neighbour_routers_interesting_groups

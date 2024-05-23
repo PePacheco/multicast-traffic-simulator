@@ -8,6 +8,8 @@ class Logger:
     sent_floods_by_rid = {}
     mgroupid_from_floods = ""
 
+    pruned_returns = []
+
     @staticmethod
     def get_instance():
         if Logger._instance is None:
@@ -28,15 +30,13 @@ class Logger:
     def prune_debug(self, sender_id: str, receiver_id: str, mgroupid: str) -> None:
         print(f'{sender_id} >> {receiver_id} : mprune {mgroupid};')
 
-    def ping_debug(self) -> None:
-        pass
-
     def box_debug(self, msg: str, mgroupid: str, origin_subnet_address: str, receiver_subnet_id) -> None:
         subnet_id = self.subnet_center.get_subnet_id(origin_subnet_address).sid
         print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {subnet_id};")
 
-   # flood methods
-   
+    def _reset_prune_structure(self):
+        self.pruned_returns = []
+
     def _reset_flood_structure(self):
         self.order_of_floods_by_rid = []
         self.sent_floods_by_rid = {}
@@ -58,7 +58,6 @@ class Logger:
             self.order_of_floods_by_rid.append(sender_rid)
 
     def print_floods(self):
-
         for sender_rid in self.order_of_floods_by_rid:
             reduced_flood_message = ""
             origin_router = self.order_of_floods_by_rid[0]
@@ -70,4 +69,9 @@ class Logger:
                 flooded_group_id_msg = reduced_flood_message.removesuffix(", ")
                 group_id_msg = f" : mflood {self.mgroupid_from_floods}"
                 print(flooded_group_id_msg + group_id_msg + ";")
+
+        if len(self.pruned_returns) > 0:
+            for prune_answer in self.pruned_returns:
+                self.prune_debug(prune_answer['pruned_answer'].sender_id, prune_answer['self.rid'], prune_answer['mgroupid'])
         self._reset_flood_structure()
+        self._reset_prune_structure()
