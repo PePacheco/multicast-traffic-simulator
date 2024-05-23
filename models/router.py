@@ -105,6 +105,7 @@ class Router:
         interestedGroups = set()
         origin_address = package.origin_adress
         correct_hop_addr_to_origin, interface = self.routing_table[origin_address]
+        self.logger.router_received_flood_from(self.rid, package.last_address, package.multicast_group)
         if package.get_last_address() == correct_hop_addr_to_origin:
             #flood here
             interestedGroups = self.start_flood(package.multicast_group, package.origin_adress)
