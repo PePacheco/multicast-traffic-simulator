@@ -16,8 +16,8 @@ class Logger:
             Logger._instance = Logger()
         return Logger._instance
 
-    def append_pruned_return(self, pruned_return: dict) -> None:
-        self.pruned_returns.append(pruned_return)
+
+# join and leave
 
     def join_debug(self, subnet_id: str, router_id: str, mgroupid: str) -> None:
         self.print_floods()
@@ -27,15 +27,13 @@ class Logger:
         self.print_floods()
         print(f'{router_id} => {subnet_id} : mleave {mgroupid};')
 
-    def flood_debug(self, sender_id: str, receiver_id: str, mgroupid: str) -> None:
-        print(f'{sender_id} >> {receiver_id} : mflood {mgroupid};')
+# prune and flood methods
 
     def prune_debug(self, sender_id: str, receiver_id: str, mgroupid: str) -> None:
         print(f'{sender_id} >> {receiver_id} : mprune {mgroupid};')
 
-    def box_debug(self, msg: str, mgroupid: str, origin_subnet_address: str, receiver_subnet_id) -> None:
-        subnet_id = self.subnet_center.get_subnet_id(origin_subnet_address).sid
-        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {subnet_id};")
+    def append_pruned_return(self, pruned_return: dict) -> None:
+        self.pruned_returns.append(pruned_return)
 
     def _reset_prune_structure(self):
         self.pruned_returns = []
@@ -78,3 +76,10 @@ class Logger:
                 self.prune_debug(prune_answer['pruned_answer'].sender_id, prune_answer['self.rid'], prune_answer['mgroupid'])
         self._reset_flood_structure()
         self._reset_prune_structure()
+
+
+# Ping and Box methods
+
+    def box_debug(self, msg: str, mgroupid: str, origin_subnet_address: str, receiver_subnet_id) -> None:
+        subnet_id = self.subnet_center.get_subnet_id(origin_subnet_address).sid
+        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {subnet_id};")
