@@ -12,4 +12,7 @@ class SubnetCenter:
         self.subnets[subnet.netaddr] = subnet
 
     def get_subnet_id(self, subnet_address):
-        return self.subnets[subnet_address]
+        subnet = self.subnets.get(subnet_address)
+        if subnet is None:
+            return None
+        return subnet.sid

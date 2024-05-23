@@ -68,6 +68,9 @@ class Router:
     def start_ping(self, sid: str , mgroupid: str, ping_msg: str):
         subnet_instance = self.subnets[sid]
         origin_subnet_address = subnet_instance.netaddr
+
+        self.logger.set_origin_subnet_id(subnet_instance.sid)
+        
         self.start_flood(mgroupid, origin_subnet_address)
         self._forward_ping_to_routers(origin_subnet_address, mgroupid, ping_msg)
         self._forward_ping_to_subnets(origin_subnet_address, mgroupid, ping_msg)

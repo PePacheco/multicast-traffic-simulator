@@ -4,6 +4,8 @@ class Logger:
     _instance = None
     subnet_center = SubnetCenter.get_instance()
 
+    origin_subnet_id = ""
+
     order_of_floods_by_rid = []
     sent_floods_by_rid = {}
     mgroupid_from_floods = ""
@@ -25,9 +27,16 @@ class Logger:
         return Logger._instance
 
 
+    def set_origin_subnet_id(self, origin_subnet_id):
+        self.origin_subnet_id = origin_subnet_id
+
     def print_floods_pings_and_boxes(self):
         self.print_floods()
         self.print_pings()
+
+        self._reset_flood_structure()
+        self._reset_prune_structure()
+        self._reset_ping_structure()
 
 # join and leave
     
@@ -87,23 +96,22 @@ class Logger:
         if len(self.pruned_returns) > 0:
             for prune_answer in self.pruned_returns:
                 self.prune_debug(prune_answer['pruned_answer'].sender_id, prune_answer['self.rid'], prune_answer['mgroupid'])
-        self._reset_flood_structure()
-        self._reset_prune_structure()
 
 
 # Ping and Box methods
 
-    def box_debug(self, msg: str, mgroupid: str, origin_subnet_address: str, receiver_subnet_id) -> None:
-        subnet_id = self.subnet_center.get_subnet_id(origin_subnet_address).sid
-        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {subnet_id};")
+    def box_debug(self, msg: str, mgroupid: str, receiver_subnet_id) -> None:
+        origin_router_subnet_id = self.origin_subnet_id
+        print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {origin_router_subnet_id};")
 
-    def reset_ping_structure(self):
+    def _reset_ping_structure(self):
         self.order_of_pings_by_rid = []
         self.sent_pings_by_rid = {}
         self.mgroupid_from_pings = ""
 
         self.order_of_pings_to_subnets_by_rid = []
-        self.sent_pings_to_subnets_by_rid
+        self.sent_pings_to_subnets_by_rid = {}
+    
 
     def router_sent_ping_to(self, sender_rid, receiver_rid, mgroupid):
         self.mgroupid_from_pings = mgroupid
@@ -129,25 +137,28 @@ class Logger:
 
 
     def print_pings(self):
-        for sender_rid in self.order_of_pings_by_rid:
+
+        for sender_rid in self.order_of_floods_by_rid:
             reduced_ping_message = ""
-            origin_router = self.order_of_pings_by_rid[0]
+            origin_router = self.order_of_floods_by_rid[0]
             recipient_rids = self.sent_pings_by_rid.get(sender_rid)
+            if recipient_rids == None:
+                self.printRelatedBoxes(sender_rid)
+                continue
             for recipient_rid in recipient_rids:
                 if recipient_rid != origin_router:
-                    reduced_ping_message += f'{sender_rid} >> {recipient_rid}, '
+                    reduced_ping_message += f'{sender_rid} =>> {recipient_rid}, '
             if reduced_ping_message != "":
                 ping_group_id_msg = reduced_ping_message.removesuffix(", ")
                 group_id_msg = f" : mping {self.mgroupid_from_pings}"
                 print(ping_group_id_msg + group_id_msg + ";")
                 self.printRelatedBoxes(sender_rid)
-        
-        self.reset_ping_structure()
+
 
     def printRelatedBoxes(self, sender_rid):
-        print(sender_rid)
         if self.sent_pings_to_subnets_by_rid.get(sender_rid) == None:
             return
-
-        for receiver_sid in self.sent_pings_to_subnets_by_rid[sender_rid]:
-            self.box_debug(self.message, self.mgroupid_from_pings, sender_rid, receiver_sid)
+        
+        subnets = self.sent_pings_to_subnets_by_rid[sender_rid]
+        for receiver_sid in subnets:
+            self.box_debug(self.message, self.mgroupid_from_pings, receiver_sid)
