@@ -16,6 +16,9 @@ class Logger:
             Logger._instance = Logger()
         return Logger._instance
 
+    def append_pruned_return(self, pruned_return: dict) -> None:
+        self.pruned_returns.append(pruned_return)
+
     def join_debug(self, subnet_id: str, router_id: str, mgroupid: str) -> None:
         self.print_floods()
         print(f'{subnet_id} => {router_id} : mjoin {mgroupid};')

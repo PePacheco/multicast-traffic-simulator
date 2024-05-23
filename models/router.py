@@ -88,8 +88,7 @@ class Router:
                 if prune_answer.multicast_group:
                     self.interested_routers[next_hop] = prune_answer.multicast_group
                 else:
-                    self.logger.pruned_returns.append({ 'pruned_answer': prune_answer, 'mgroupid': mgroupid, 'self.rid': self.rid })
-                    # self.logger.prune_debug(prune_answer.sender_id , self.rid , mgroupid)
+                    self.logger.append_pruned_return({ 'pruned_answer': prune_answer, 'mgroupid': mgroupid, 'self.rid': self.rid })
 
         neighbour_routers_interesting_groups.update(self.interesting_groups())
         interested_groups = neighbour_routers_interesting_groups
