@@ -50,13 +50,14 @@ class Router:
                     if ip_in_same_subnet(router_address, ip):
                         origin_address = ip.split('/')[0]
                         router.receive_ping_from_router(PingMessage(origin_subnet_address, router_address, origin_address, mgroupid, message))
+                        self.logger.router_sent_ping_to(self.rid, router.rid , mgroupid)
                         break
 
     def _forward_ping_to_subnets(self, origin_subnet_address: str, mgroupid: str, message: str) -> None:
         interested_subnet_addresses = self.groups.get(mgroupid,[])
         for subnet_id, subnet_address in interested_subnet_addresses:
             subnet = self.subnets.get(subnet_id)
-            subnet.receive_ping_from_router(origin_subnet_address, mgroupid, message)
+            subnet.receive_ping_from_router(self.rid, mgroupid, message)
 
     def receive_ping_from_router(self, package: PingMessage) -> None:
         mgroupid = package.multicast_group

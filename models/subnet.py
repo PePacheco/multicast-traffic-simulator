@@ -18,6 +18,6 @@ class Subnet:
           return (m)
     return (False)
   
-  def receive_ping_from_router(self, origin_subnet_address: str, mgroupid: str, message: str):
-        self.logger.box_debug(message, mgroupid, origin_subnet_address, self.sid)
+  def receive_ping_from_router(self, sender_rid: str, mgroupid: str, message: str):
+        self.logger.received_ping_from_router(sender_rid, self.sid, message)
         return
