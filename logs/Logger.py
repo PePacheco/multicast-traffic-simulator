@@ -5,6 +5,7 @@ class Logger:
     subnet_center = SubnetCenter.get_instance()
 
     origin_subnet_id = ""
+    first_router_id = ""
 
     order_of_floods_by_rid = []
     sent_floods_by_rid = {}
@@ -27,10 +28,12 @@ class Logger:
         return Logger._instance
 
 
-    def set_origin_subnet_id(self, origin_subnet_id):
+    def set_origin_subnet_id(self, origin_subnet_id, first_router_id):
         self.origin_subnet_id = origin_subnet_id
+        self.first_router_id = first_router_id
 
     def print_floods_pings_and_boxes(self):
+        self.print_first_ping()
         self.print_floods()
         self.print_pings()
 
@@ -105,6 +108,9 @@ class Logger:
         print(f"{receiver_subnet_id} box {receiver_subnet_id} : {mgroupid}#{msg} from {origin_router_subnet_id};")
 
     def _reset_ping_structure(self):
+        self.origin_subnet_id = ""
+        self.first_router_id = ""
+
         self.order_of_pings_by_rid = []
         self.sent_pings_by_rid = {}
         self.mgroupid_from_pings = ""
@@ -162,3 +168,8 @@ class Logger:
         subnets = self.sent_pings_to_subnets_by_rid[sender_rid]
         for receiver_sid in subnets:
             self.box_debug(self.message, self.mgroupid_from_pings, receiver_sid)
+
+    def print_first_ping(self):
+        if self.origin_subnet_id == "":
+            return
+        print(f"{self.origin_subnet_id} =>> {self.first_router_id} : mping {self.mgroupid_from_pings} {self.message};")
