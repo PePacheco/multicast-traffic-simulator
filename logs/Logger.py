@@ -28,13 +28,20 @@ class Logger:
         return Logger._instance
 
 
-    def set_origin_subnet_id(self, origin_subnet_id, first_router_id):
+    def set_origin_subnet_id(self, origin_subnet_id, first_router_id, mgroupid):
         self.origin_subnet_id = origin_subnet_id
         self.first_router_id = first_router_id
+        self.mgroupid_from_pings = mgroupid
 
     def print_floods_pings_and_boxes(self):
+
         self.print_first_ping()
         self.print_floods()
+        
+        if len(self.order_of_floods_by_rid) == 0:
+            return
+        
+        self.printRelatedBoxes(self.order_of_floods_by_rid[0])
         self.print_pings()
 
         self._reset_flood_structure()
@@ -167,7 +174,9 @@ class Logger:
         
         subnets = self.sent_pings_to_subnets_by_rid[sender_rid]
         for receiver_sid in subnets:
+            print(f'{sender_rid} =>> {receiver_sid} : mping {self.mgroupid_from_pings} {self.message};')
             self.box_debug(self.message, self.mgroupid_from_pings, receiver_sid)
+
 
     def print_first_ping(self):
         if self.origin_subnet_id == "":
