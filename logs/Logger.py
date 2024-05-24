@@ -47,7 +47,7 @@ class Logger:
 
     def leave_debug(self, router_id: str, subnet_id: str, mgroupid: str) -> None:
         self.print_floods_pings_and_boxes()
-        print(f'{router_id} => {subnet_id} : mleave {mgroupid};')
+        print(f'{subnet_id} => {router_id} : mleave {mgroupid};')
 
 # prune and flood methods
 
@@ -111,7 +111,7 @@ class Logger:
 
         self.order_of_pings_to_subnets_by_rid = []
         self.sent_pings_to_subnets_by_rid = {}
-    
+
 
     def router_sent_ping_to(self, sender_rid, receiver_rid, mgroupid):
         self.mgroupid_from_pings = mgroupid
@@ -150,7 +150,7 @@ class Logger:
                     reduced_ping_message += f'{sender_rid} =>> {recipient_rid}, '
             if reduced_ping_message != "":
                 ping_group_id_msg = reduced_ping_message.removesuffix(", ")
-                group_id_msg = f" : mping {self.mgroupid_from_pings}"
+                group_id_msg = f" : mping {self.mgroupid_from_pings} {self.message}"
                 print(ping_group_id_msg + group_id_msg + ";")
                 self.printRelatedBoxes(sender_rid)
 
