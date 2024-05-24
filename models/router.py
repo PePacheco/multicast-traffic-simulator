@@ -70,11 +70,12 @@ class Router:
         origin_subnet_address = subnet_instance.netaddr
 
         self.logger.set_origin_subnet_id(subnet_instance.sid, self.rid, mgroupid )
+        self.logger.this_origin_has_interested_groups(self.rid)
 
         self.start_flood(mgroupid, origin_subnet_address)
         self._forward_ping_to_routers(origin_subnet_address, mgroupid, ping_msg)
         self._forward_ping_to_subnets(origin_subnet_address, mgroupid, ping_msg)
-        
+
         self.logger.print_floods_pings_and_boxes()
 
     def start_flood(self, mgroupid: str, origin_subnet_address: str) -> set[str]:

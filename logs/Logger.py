@@ -21,12 +21,18 @@ class Logger:
     sent_pings_to_subnets_by_rid = {}
     message = ""
 
+    origin_has_interested_groups = False
+    origin_rid = ""
+
     @staticmethod
     def get_instance():
         if Logger._instance is None:
             Logger._instance = Logger()
         return Logger._instance
 
+    def this_origin_has_interested_groups(self, origin_rid: str):
+        self.origin_has_interested_groups = True
+        self.origin_rid = origin_rid
 
     def set_origin_subnet_id(self, origin_subnet_id, first_router_id, mgroupid):
         self.origin_subnet_id = origin_subnet_id
@@ -38,10 +44,10 @@ class Logger:
         self.print_first_ping()
         self.print_floods()
         
-        if len(self.order_of_floods_by_rid) == 0:
+        if self.origin_has_interested_groups == False:
             return
         
-        self.printRelatedBoxes(self.order_of_floods_by_rid[0])
+        self.printRelatedBoxes(self.origin_rid)
         self.print_pings()
 
         self._reset_flood_structure()
@@ -123,6 +129,9 @@ class Logger:
         self.order_of_pings_to_subnets_by_rid = []
         self.sent_pings_to_subnets_by_rid = {}
 
+        self.origin_has_interested_groups = False
+        self.origin_rid = ''
+
 
     def router_sent_ping_to(self, sender_rid, receiver_rid, mgroupid):
         self.mgroupid_from_pings = mgroupid
@@ -168,13 +177,17 @@ class Logger:
     def printRelatedBoxes(self, sender_rid):
         if self.sent_pings_to_subnets_by_rid.get(sender_rid) == None:
             return
-        
+
+        reduced_ping_to_subnet = ""
         subnets = self.sent_pings_to_subnets_by_rid[sender_rid]
         for receiver_sid in subnets:
-            print(f'{sender_rid} =>> {receiver_sid} : mping {self.mgroupid_from_pings} {self.message};')
+            reduced_ping_to_subnet += f'{sender_rid} =>> {receiver_sid}, '
+        reduced_ping_to_subnet = reduced_ping_to_subnet.removesuffix(", ")
+        ping_to_subnets = reduced_ping_to_subnet + f" : mping {self.mgroupid_from_pings} {self.message}" + ';'
+        print(ping_to_subnets)
+        for receiver_sid in subnets:
             self.box_debug(self.message, self.mgroupid_from_pings, receiver_sid)
-
-
+            
     def print_first_ping(self):
         if self.origin_subnet_id == "":
             return
