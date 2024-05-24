@@ -74,6 +74,8 @@ class Router:
         self.start_flood(mgroupid, origin_subnet_address)
         self._forward_ping_to_routers(origin_subnet_address, mgroupid, ping_msg)
         self._forward_ping_to_subnets(origin_subnet_address, mgroupid, ping_msg)
+        
+        self.logger.print_floods_pings_and_boxes()
 
     def start_flood(self, mgroupid: str, origin_subnet_address: str) -> set[str]:
         already_flooded_neighbours = []

@@ -52,11 +52,9 @@ class Logger:
     
 
     def join_debug(self, subnet_id: str, router_id: str, mgroupid: str) -> None:
-        self.print_floods_pings_and_boxes()
         print(f'{subnet_id} => {router_id} : mjoin {mgroupid};')
 
     def leave_debug(self, router_id: str, subnet_id: str, mgroupid: str) -> None:
-        self.print_floods_pings_and_boxes()
         print(f'{subnet_id} => {router_id} : mleave {mgroupid};')
 
 # prune and flood methods
@@ -150,7 +148,6 @@ class Logger:
 
 
     def print_pings(self):
-
         for sender_rid in self.order_of_floods_by_rid:
             reduced_ping_message = ""
             origin_router = self.order_of_floods_by_rid[0]
