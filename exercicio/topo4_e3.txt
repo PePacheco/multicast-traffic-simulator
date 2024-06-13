@@ -1,0 +1,15 @@
+mjoin s2 g1
+mping s1 g1 hello1
+mjoin s3 g1
+mping s1 g1 hello2
+mjoin s4 g1
+mping s1 g1 hello3
+mjoin s5 g1
+mping s1 g1 hello4
+mleave s5 g1
+mping s1 g1 hello5
+mleave s3 g1
+mping s1 g1 hello6
+mleave s2 g1
+mping s1 g1 hello7
+mleave s4 g1
